@@ -9,20 +9,21 @@ from jose import JWTError, jwt
 from models import Book, Device, Student, StudentAccount, StudyRoom
 import os
 import utils
-import mysql.connector
+import pyodbc
 
-# MySQL Stuff
+server = os.getenv("DB_SERVER")
+database = os.getenv("DB_NAME")
+username = os.getenv("DB_USER")
+password = os.getenv("DB_PASS")
+driver= os.getenv("DB_DRIVER")
+port = os.getenv("DB_PORT")
+
+# Database Stuff
 while True:
     try:
-        # Determine Database Host
-        db_host = "127.0.0.1" if os.getenv("DB_HOST") is None else os.getenv("DB_HOST")
-        conn = mysql.connector.connect(
-            user="test",
-            password="test",
-            host=db_host,
-            port=3306,
-            database="LIBRARY"
-        )
+        connstring = 'DRIVER={0};SERVER=tcp:{1};PORT={2};DATABASE={3};UID={4};PWD={5}'.format(driver, server, port, database, username, password)
+        conn = pyodbc.connect(connstring)
+
     except Exception as e:
         print(e)
         continue
@@ -30,7 +31,7 @@ while True:
         print("Connection to DB established.")
         break
 
-# MySQL cursor
+# DB cursor
 cur = conn.cursor()
 
 # FastAPI Stuff
@@ -89,7 +90,7 @@ class AccountType(Enum):
 
 
 def get_user_from_username(username: str):
-    cur.execute(f"SELECT * FROM ACCOUNT WHERE username=\"{username}\"")
+    cur.execute(f"SELECT * FROM ACCOUNT WHERE username='{username}'")
     data = utils.dict_to_json(cur)
     if not data:
         return None
@@ -194,7 +195,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 #########
 @app.get("/books")
 async def list_books(current_user: User = Depends(get_current_user)):
-    cur.execute("SELECT * FROM BOOK WHERE is_rented=false")
+    cur.execute("SELECT * FROM BOOK WHERE is_rented=0")
     data = utils.dict_to_json(cur)
     return data
 
@@ -210,7 +211,7 @@ async def get_book_by_id(book_id: int, current_user: User = Depends(get_current_
 
 @app.get("/book/title/{book_title}")
 async def get_book_id_by_title(book_title: str, current_user: User = Depends(get_current_user)):
-    cur.execute(f"SELECT * FROM BOOK WHERE title LIKE \"%{book_title}%\" AND is_rented=false")
+    cur.execute(f"SELECT * FROM BOOK WHERE title LIKE '%{book_title}%' AND is_rented=0")
     data = utils.dict_to_json(cur)
     if not data:
         raise HTTPException(status_code=404, detail="Book not found.")
@@ -227,7 +228,7 @@ async def rent_book_by_id(book_id: int, current_user: User = Depends(get_current
     if utils.student_already_rented(cur, "book", current_user.account_id):
         raise HTTPException(status_code=401, detail="Return your current book before renting another.")
 
-    cur.execute(f"UPDATE BOOK SET is_rented=true WHERE book_id={book_id}")
+    cur.execute(f"UPDATE BOOK SET is_rented=1 WHERE book_id={book_id}")
     cur.execute(f"UPDATE STUDENT SET rented_book={book_id} WHERE account_id={current_user.account_id}")
     conn.commit()
     return book_id
@@ -244,7 +245,7 @@ async def return_book_by_id(book_id: int, current_user: User = Depends(get_curre
     if book_id != rented_book_id:
         raise HTTPException(status_code=400, detail="You can't return a book that you haven't rented.")
 
-    cur.execute(f"UPDATE BOOK SET is_rented=false WHERE book_id={book_id}")
+    cur.execute(f"UPDATE BOOK SET is_rented=0 WHERE book_id={book_id}")
     cur.execute(f"UPDATE STUDENT SET rented_book=0 WHERE account_id={current_user.account_id}")
     conn.commit()
 
@@ -294,7 +295,7 @@ async def delete_book(book: Book, current_user: User = Depends(get_current_user)
 ###############
 @app.get("/studyrooms")
 async def list_study_rooms(current_user: User = Depends(get_current_user)):
-    cur.execute("SELECT * FROM STUDY_ROOM WHERE is_rented=false")
+    cur.execute("SELECT * FROM STUDY_ROOM WHERE is_rented=0")
     data = utils.dict_to_json(cur)
 
     return data
@@ -318,7 +319,7 @@ async def rent_study_room_by_room_no(room_no: int, current_user: User = Depends(
     if utils.student_already_rented(cur, "study_room", current_user.account_id):
         raise HTTPException(status_code=401, detail="Return your current study room before renting another.")
 
-    cur.execute(f"UPDATE STUDY_ROOM SET is_rented=true WHERE room_no={room_no}")
+    cur.execute(f"UPDATE STUDY_ROOM SET is_rented=1 WHERE room_no={room_no}")
     cur.execute(f"UPDATE STUDENT SET rented_study_room={room_no} WHERE account_id={current_user.account_id}")
     conn.commit()
     return
@@ -335,7 +336,7 @@ async def return_study_room_by_room_no(room_no: int, current_user: User = Depend
     if room_no != rented_study_room_no:
         raise HTTPException(status_code=400, detail="You can't return a study room that you haven't rented.")
 
-    cur.execute(f"UPDATE STUDY_ROOM SET is_rented=false WHERE room_no={room_no}")
+    cur.execute(f"UPDATE STUDY_ROOM SET is_rented=0 WHERE room_no={room_no}")
     cur.execute(f"UPDATE STUDENT SET rented_study_room=0 WHERE account_id={current_user.account_id}")
     conn.commit()
 
@@ -382,7 +383,7 @@ async def delete_study_room(study_room: StudyRoom, current_user: User = Depends(
 ###########
 @app.get("/devices")
 async def list_devices(current_user: User = Depends(get_current_user)):
-    cur.execute("SELECT * FROM DEVICE WHERE is_rented=false")
+    cur.execute("SELECT * FROM DEVICE WHERE is_rented=0")
     data = utils.dict_to_json(cur)
 
     return data
@@ -406,7 +407,7 @@ async def rent_device_by_id(device_id: int, current_user: User = Depends(get_cur
     if utils.student_already_rented(cur, "device", current_user.account_id):
         raise HTTPException(status_code=401, detail="Return your current device before renting another.")
 
-    cur.execute(f"UPDATE DEVICE SET is_rented=true WHERE device_id={device_id}")
+    cur.execute(f"UPDATE DEVICE SET is_rented=1 WHERE device_id={device_id}")
     cur.execute(f"UPDATE STUDENT SET rented_device={device_id} WHERE account_id={current_user.account_id}")
     conn.commit()
     return
@@ -423,7 +424,7 @@ async def return_device_by_id(device_id: int, current_user: User = Depends(get_c
     if device_id != rented_device_id:
         raise HTTPException(status_code=400, detail="You can't return a device that you haven't rented.")
 
-    cur.execute(f"UPDATE DEVICE SET is_rented=false WHERE device_id={device_id}")
+    cur.execute(f"UPDATE DEVICE SET is_rented=0 WHERE device_id={device_id}")
     cur.execute(f"UPDATE STUDENT SET rented_device=0 WHERE account_id={current_user.account_id}")
     conn.commit()
 
