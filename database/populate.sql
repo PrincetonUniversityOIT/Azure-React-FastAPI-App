@@ -79,13 +79,13 @@ Creating Books: LIBRARY_ASSETS -> BOOK
 
 -- Add 3 library assets
 INSERT INTO LIBRARY_ASSETS
-VALUES ();
+VALUES (1);
 
 INSERT INTO LIBRARY_ASSETS
-VALUES ();
+VALUES (2);
 
 INSERT INTO LIBRARY_ASSETS
-VALUES ();
+VALUES (3);
 
 /*
 +----------+---------------------+
