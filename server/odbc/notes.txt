@@ -1,0 +1,3 @@
+These files downloaded from:
+curl https://packages.microsoft.com/keys/microsoft.asc > microsoft.asc
+curl https://packages.microsoft.com/config/debian/10/prod.list > mssql-release.list
