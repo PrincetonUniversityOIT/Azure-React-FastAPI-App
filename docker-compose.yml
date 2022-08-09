@@ -1,21 +1,23 @@
 services:
-  database:
-    build: ./database
-    container_name: library_database
-    ports:
-      - 3306:3306
-      - 3306:3306/udp
-    environment:
-      MARIADB_ROOT_PASSWORD: "test"
-    restart: unless-stopped
+  # database:
+  #   build: ./database
+  #   container_name: library_database
+  #   ports:
+  #     - 3306:3306
+  #     - 3306:3306/udp
+  #   environment:
+  #     MARIADB_ROOT_PASSWORD: "test"
+  #   restart: unless-stopped
   server:
     build: ./server
+    
     container_name: library_server
     ports:
       - 8000:8000
       - 8000:8000/udp
-    environment:
-      DB_HOST: "library_database"
+    env_file: python.env
+    
+    
     restart: unless-stopped
   client:
     build:

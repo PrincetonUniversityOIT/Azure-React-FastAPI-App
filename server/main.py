@@ -18,6 +18,9 @@ password = os.getenv("DB_PASS")
 driver= os.getenv("DB_DRIVER")
 port = os.getenv("DB_PORT")
 
+#remove \ from password
+password = password.translate({ord('\\'):None})
+
 # Database Stuff
 while True:
     try:

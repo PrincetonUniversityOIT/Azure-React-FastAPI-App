@@ -8,6 +8,9 @@ password = os.getenv("DB_PASS")
 driver= os.getenv("DB_DRIVER")
 port = os.getenv("DB_PORT")
 
+#remove \ from password
+password = password.translate({ord('\\'):None})
+
 with pyodbc.connect('DRIVER='+driver+';SERVER=tcp:'+server+';PORT=1433;DATABASE='+database+';UID='+username+';PWD='+ password) as conn:
     with conn.cursor() as cursor:
         cursor.execute("SELECT TOP 3 name, collation_name FROM sys.databases")
