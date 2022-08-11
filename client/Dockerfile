@@ -1,14 +1,21 @@
-FROM node:16
-WORKDIR /app
+### STAGE 1: Build ###
+FROM node:16 as builder
 
-ENV PATH /app/node_modules/.bin:$PATH
+RUN mkdir /usr/src/app
+WORKDIR /usr/src/app
+
+ENV PATH /usr/src/app/node_modules/.bin:$PATH
 
 COPY ./package.json ./
 COPY ./package-lock.json ./
+
 RUN npm install
 
 COPY . ./
-ARG SERVER_HOST
-RUN sed -i "s/localhost/$SERVER_HOST/g" package.json
+RUN npm run build
 
-CMD ["npm", "start"]
+### STAGE 2: Production Environment ###
+FROM nginx:1.13.12-alpine
+COPY --from=builder /usr/src/app/build /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
