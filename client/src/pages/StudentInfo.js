@@ -1,5 +1,5 @@
 import "../App.css";
-import axios from "axios";
+import axios from "../components/axios";
 import Button from "emerald-ui/lib/Button";
 import "emerald-ui/lib/styles.css";
 import React, { useEffect, useState } from "react";

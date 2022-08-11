@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "../components/axios";
 import Button from "emerald-ui/lib/Button";
 import TextField from "emerald-ui/lib/TextField";
 import { useEffect } from "react";

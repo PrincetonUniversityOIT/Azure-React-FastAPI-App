@@ -1,5 +1,5 @@
 import "../App.css";
-import axios from "axios";
+import axios from "../components/axios";
 import Card from "emerald-ui/lib/Card";
 import CardGrid from "emerald-ui/lib/CardGrid";
 import "emerald-ui/lib/styles.css";
