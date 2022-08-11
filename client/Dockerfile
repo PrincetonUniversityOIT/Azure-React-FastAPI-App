@@ -8,7 +8,7 @@ COPY ./package-lock.json ./
 RUN npm install
 
 COPY . ./
-ARG SERVER_HOST
-RUN sed -i "s/localhost/$SERVER_HOST/g" package.json
+#ARG SERVER_HOST
+#RUN sed -i "s/localhost/$SERVER_HOST/g" package.json
 
 CMD ["npm", "start"]
