@@ -17,6 +17,7 @@ username = os.getenv("DB_USER")
 password = os.getenv("DB_PASS")
 driver= os.getenv("DB_DRIVER")
 port = os.getenv("DB_PORT")
+cors_allow = os.getenv("CORS_ALLOW")
 
 #remove \ from password
 password = password.translate({ord('\\'):None})
@@ -47,6 +48,10 @@ origins = [
     "http://localhost:8000",
     "http://localhost"
 ]
+
+if cors_allow:
+    for allow_site in cors_allow.split(','):
+        origins.append(allow_site)
 
 app.add_middleware(
     CORSMiddleware,
