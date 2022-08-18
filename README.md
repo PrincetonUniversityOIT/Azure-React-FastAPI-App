@@ -1,6 +1,16 @@
 # CS4347 Project - Library Database
 
-## Setup Instructions
+## Azure setup instructions
+
+1. Setup the db as Azure SQL. It can be connected to from development system or from ACA.
+2. Build the server and client seperately, first locally to test, then build image on Azure or transfer local image to Azure.
+3. Build ACA's on Azure Portal, noting the following:
+    - Command should be without qoutes in CMD from Dockerfile
+    - All ports are 80
+    - db password can be local secret, then referenced by env var
+  
+
+## Original Setup Instructions
 
 ### Docker (Recommended)
 
